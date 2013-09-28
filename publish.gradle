@@ -1,0 +1,39 @@
+apply plugin: 'maven-publish'
+
+group = 'com.ecwid'
+version = '0.1'
+
+task sourceJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+publishing {
+	publications {
+		module(MavenPublication) {
+			from components.java
+
+			artifact (sourceJar) {
+				classifier = 'sources'
+			}
+		}
+	}
+
+	repositories {
+		if (project.hasProperty("vgvNexusCredentials")) {
+			int colonIndex = vgvNexusCredentials.indexOf(':')
+			if (colonIndex < 0) {
+				throw new GradleScriptException("Invalid credentials specified")
+			}
+
+			maven {
+				url "http://nexus.vgv.me/content/repositories/releases/"
+
+				credentials {
+					username vgvNexusCredentials.substring(0, colonIndex)
+					password vgvNexusCredentials.substring(colonIndex + 1)
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,17 @@
+defaultTasks 'clean', 'testClasses'
+
+apply plugin: "java"
+apply plugin: "idea"
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.google.gwt:gwt-user:2.6.1"
+}
+
+apply from: "publish.gradle"
