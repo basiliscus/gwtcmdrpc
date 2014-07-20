@@ -6,12 +6,38 @@ apply plugin: "idea"
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+configurations {
+	gwt
+	testCompile.extendsFrom gwt
+}
+
+sourceSets {
+	main {
+		compileClasspath += [configurations.gwt]
+	}
+
+	test {
+		compileClasspath += [configurations.gwt]
+	}
+}
+
+apply plugin: 'idea'
+
+idea {
+	module {
+		excludeDirs += file('src/main/gwt-unitCache')
+		excludeDirs += file('private')
+
+		scopes.PROVIDED.plus += [configurations.gwt]
+	}
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile "com.google.gwt:gwt-user:2.6.1"
+    gwt "com.google.gwt:gwt-user:2.6.1"
 }
 
 apply from: "publish.gradle"

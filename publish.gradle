@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 
 group = 'com.ecwid'
-version = '0.1'
+version = '0.1.1'
 
 task sourceJar(type: Jar) {
 	from sourceSets.main.allSource
