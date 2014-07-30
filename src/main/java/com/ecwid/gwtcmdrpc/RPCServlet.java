@@ -14,28 +14,41 @@ public abstract class RPCServlet extends RemoteServiceServlet implements RPC.Ser
 
 	public RPCServlet() { }
 
-    @Override
-    public <T extends Response> T call(Request<T> request) throws ServiceException {
-		log.log(Level.INFO, "Request execution started: " + request);
+	@Override
+    public final <T extends Response> T call(Request<T> request) throws ServiceException {
+		long start = System.nanoTime();
+		int identity = System.identityHashCode(request);
+
+		if (log.isLoggable(Level.INFO)) {
+			StringBuilder sb = new StringBuilder("Request execution started");
+			sb.append("\n").append("Request: ").append(request);
+			sb.append("\n").append("Request identity: ").append(identity);
+			log.log(Level.INFO, sb.toString());
+		}
+
 		try {
-			T response = getRequestExecutor(request).execute(request);
-			log.log(Level.INFO, "Request execution complete: " + request + "\nResponse: "+response);
+			T response = execute(request);
+
+			if (log.isLoggable(Level.INFO)) {
+				StringBuilder sb = new StringBuilder("Request execution complete");
+				sb.append("\n").append("Request identity: ").append(identity);
+				sb.append("\n").append("Duration: ").append(System.nanoTime() - start).append(" nanos");
+				sb.append("\n").append("Response: ").append(response);
+				log.log(Level.INFO, sb.toString());
+			}
+
 			return response;
 		} catch (Throwable exception) {
-			log.log(Level.INFO, "Request execution failed: " + request, exception);
+			if (log.isLoggable(Level.INFO)) {
+				StringBuilder sb = new StringBuilder("Request execution failed");
+				sb.append("\n").append("Request identity: ").append(identity);
+				sb.append("\n").append("Duration: ").append(System.nanoTime() - start).append(" nanos");
+				log.log(Level.INFO, sb.toString(), exception);
+			}
+
 			throw exception;
 		}
     }
 
-	@SuppressWarnings("unchecked")
-	private <T extends Response> RequestExecutor<Request<T>, T> getRequestExecutor(Request<T> request) {
-		ExecutedBy annotation = request.getClass().getAnnotation(ExecutedBy.class);
-		if (annotation == null) {
-			throw new IllegalArgumentException(request.getClass() + " must be annotated with " + ExecutedBy.class);
-		}
-
-		return (RequestExecutor) getExecutorInstance(annotation.value());
-	}
-
-	protected abstract <E extends RequestExecutor<?, ?>> E getExecutorInstance(Class<E> clazz);
+	protected abstract <T extends Response> T execute(Request<T> request) throws ServiceException;
 }

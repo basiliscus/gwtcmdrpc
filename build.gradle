@@ -24,6 +24,11 @@ sourceSets {
 apply plugin: 'idea'
 
 idea {
+	project {
+		jdkName = '1.7'
+		languageLevel = '1.7'
+	}
+
 	module {
 		excludeDirs += file('src/main/gwt-unitCache')
 		excludeDirs += file('private')
